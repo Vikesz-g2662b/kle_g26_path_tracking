@@ -39,7 +39,7 @@ A workspace helye: `~/ros2_ws/`.
 cd ~/ros2_ws/src
 ```
 ``` r
-git clone https://github.com/Vikesz-g2662b/path_tracking_compare
+git clone https://github.com/Vikesz-g2662b/kle_g26_path_tracking
 ```
 
 ### Build
