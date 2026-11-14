@@ -1,59 +1,63 @@
-# `ros2_py_template` package
-ROS 2 python package.  [![Static Badge](https://img.shields.io/badge/ROS_2-Humble-34aec5)](https://docs.ros.org/en/humble/)
-## Packages and build
+# `path_tracking_compare` package
 
-It is assumed that the workspace is `~/ros2_ws/`.
+ROS 2 Python csomag. [![Static Badge](https://img.shields.io/badge/ROS_2-Humble-34aec5)](https://docs.ros.org/en/humble/)
 
-### Clone the packages
+Nagy féléves beadandó az Autonóm járművek és robotok programozása tárgyhoz.
+
+> [!NOTE]
+> A projekt fejlesztés alatt áll.
+
+## A projekt célja
+
+Két klasszikus útvonalkövető szabályozó, a **Pure Pursuit** és a **Stanley**, összehasonlítása szimulált roboton. A robot egy előre megadott pályát követ, a szabályozók teljesítményét pedig a követési hiba alapján mérem különböző sebességeken és paraméterekkel.
+
+## Tervezett felépítés
+
+Három node-ból fog állni a csomag, ezek topicokon keresztül beszélnek egymással:
+
+```mermaid
+flowchart LR
+    G[path_generator] -- /path --> C[controller]
+    C -- /cmd_vel --> R[robot / szimuláció]
+    R -- /odom --> C
+    R -- /odom --> E[evaluator]
+    G -- /path --> E
+```
+
+| Node | Feladat |
+|---|---|
+| `path_generator` | a referencia pálya előállítása és publikálása |
+| `controller` | Pure Pursuit vagy Stanley szabályozó (paraméterrel választható) |
+| `evaluator` | követési hiba mérése, eredmények mentése |
+
+## Telepítés és build
+
+A workspace helye: `~/ros2_ws/`.
+
+### A csomag klónozása
 ``` r
 cd ~/ros2_ws/src
 ```
 ``` r
-git clone https://github.com/sze-info/ros2_py_template
+git clone https://github.com/Vikesz-g2662b/path_tracking_compare
 ```
 
-### Build ROS 2 packages
+### Build
 ``` r
 cd ~/ros2_ws
 ```
 ``` r
-colcon build --packages-select ros2_py_template --symlink-install
+colcon build --packages-select path_tracking_compare --symlink-install
 ```
 
 <details>
-<summary> Don't forget to source before ROS commands.</summary>
+<summary> A ROS parancsok előtt source-olás.</summary>
 
 ``` bash
 source ~/ros2_ws/install/setup.bash
 ```
 </details>
 
-``` r
-ros2 launch ros2_py_template launch_example1.launch.py
-```
+## Felhasznált források
 
-# Delete this part if you are using it as a template
-
-ROS 2 pacage template, to get started, use template by clicking on the Green button labeled [`Use this template`](https://github.com/sze-info/ros2_py_template/generate) / [`Create new repository`](https://github.com/sze-info/ros2_py_template/generate). 
-
-<p align="center"><img src="img/use_this_template01.png" width="60%" /></p>
-
-
-Let's assume 
-- your Github username is `mycoolusername`
-- your ROS 2 repo shold be `cool_ros2_package`
-
-Replace everything in the cloned repo:
-
-- `ros2_py_template` >> `cool_ros2_package` (the folder was already renamed after `Use this template`)
-- `sze-info` >> `mycoolusername`
-- find all `todo` strings and fill the blanks
-
-The easiest way is VS code:
-
-<p align="center"><img src="img/replace01.png" width="90%" /></p>
-
-> [!IMPORTANT]  
-> Don't forget to rename the directory (folder) and the file too.
-
-Now `colcon build` your ROS 2 package and you can start wokring.
+- A csomag a [sze-info/ros2_py_template](https://github.com/sze-info/ros2_py_template) sablonból készült.
