@@ -1,17 +1,22 @@
-"""Gazebo szimulacio inditasa a vehicle_blue robottal es a ROS 2 - Gazebo hid."""
+"""Gazebo szimulacio, palya generalas es RViz inditasa."""
 
 import os
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
 
 def generate_launch_description():
     pkg_share = get_package_share_directory('path_tracking_compare')
     world = os.path.join(pkg_share, 'worlds', 'vehicle_blue.sdf')
+    rviz_config = os.path.join(pkg_share, 'rviz', 'sim.rviz')
+
+    path_type_arg = DeclareLaunchArgument(
+        'path_type', default_value='circle', description='circle vagy figure8')
 
     # Gazebo inditasa a vilaggal (-r: rogton elinditja a szimulaciot)
     gazebo = IncludeLaunchDescription(
@@ -35,4 +40,19 @@ def generate_launch_description():
         output='screen',
     )
 
-    return LaunchDescription([gazebo, bridge])
+    path_generator = Node(
+        package='path_tracking_compare',
+        executable='path_generator',
+        parameters=[{'path_type': LaunchConfiguration('path_type'),
+                     'use_sim_time': True}],
+        output='screen',
+    )
+
+    rviz = Node(
+        package='rviz2',
+        executable='rviz2',
+        arguments=['-d', rviz_config],
+        parameters=[{'use_sim_time': True}],
+    )
+
+    return LaunchDescription([path_type_arg, gazebo, bridge, path_generator, rviz])
