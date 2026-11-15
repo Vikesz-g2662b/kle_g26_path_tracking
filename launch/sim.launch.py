@@ -16,7 +16,7 @@ def generate_launch_description():
     rviz_config = os.path.join(pkg_share, 'rviz', 'sim.rviz')
 
     path_type_arg = DeclareLaunchArgument(
-        'path_type', default_value='circle', description='circle vagy figure8')
+        'path_type', default_value='circle', description='circle, figure8 vagy track')
 
     # Gazebo inditasa a vilaggal (-r: rogton elinditja a szimulaciot)
     gazebo = IncludeLaunchDescription(

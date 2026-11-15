@@ -32,6 +32,40 @@ def figure8_points(size, num_points):
     return points
 
 
+# versenypalya kontrollpontjai, size-zal szorozva
+TRACK_POINTS = [
+    (0.0, 0.0), (0.9, 0.0), (1.5, 0.15), (1.9, 0.55), (2.0, 1.1),
+    (1.75, 1.55), (1.25, 1.7), (0.75, 1.55), (0.2, 1.6), (-0.4, 1.85),
+    (-1.0, 1.75), (-1.4, 1.3), (-1.45, 0.65), (-0.9, 0.05),
+]
+
+
+def track_points(size, num_points):
+    """Zart Catmull-Rom spline a kontrollpontokon at."""
+    ctrl = [(size * x, size * y) for x, y in TRACK_POINTS]
+    n = len(ctrl)
+    steps = max(1, num_points // n)
+    points = []
+    for i in range(n):
+        p0 = ctrl[i - 1]
+        p1 = ctrl[i]
+        p2 = ctrl[(i + 1) % n]
+        p3 = ctrl[(i + 2) % n]
+        for k in range(steps):
+            t = k / steps
+            # Catmull-Rom keplet (wikipedia)
+            xy = []
+            for j in range(2):
+                a = 2.0 * p1[j]
+                b = (p2[j] - p0[j]) * t
+                c = (2.0 * p0[j] - 5.0 * p1[j] + 4.0 * p2[j] - p3[j]) * t * t
+                d = (-p0[j] + 3.0 * p1[j] - 3.0 * p2[j] + p3[j]) * t * t * t
+                xy.append(0.5 * (a + b + c + d))
+            points.append((xy[0], xy[1]))
+    points.append(points[0])
+    return points
+
+
 class PathGenerator(Node):
 
     def __init__(self):
@@ -51,6 +85,8 @@ class PathGenerator(Node):
             points = circle_points(size, num_points)
         elif path_type == 'figure8':
             points = figure8_points(size, num_points)
+        elif path_type == 'track':
+            points = track_points(size, num_points)
         else:
             self.get_logger().error(f'Ismeretlen palya: {path_type}, kor lesz helyette')
             points = circle_points(size, num_points)
