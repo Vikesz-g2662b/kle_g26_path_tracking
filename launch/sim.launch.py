@@ -1,13 +1,14 @@
-"""Gazebo szimulacio, palya generalas es RViz inditasa."""
+"""Gazebo szimulacio, palya generalas, szabalyozo es RViz inditasa."""
 
 import os
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, TimerAction
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
+from launch_ros.parameter_descriptions import ParameterValue
 
 
 def generate_launch_description():
@@ -17,6 +18,10 @@ def generate_launch_description():
 
     path_type_arg = DeclareLaunchArgument(
         'path_type', default_value='circle', description='circle, figure8 vagy track')
+    speed_arg = DeclareLaunchArgument(
+        'speed', default_value='1.0', description='sebesseg [m/s]')
+    lookahead_arg = DeclareLaunchArgument(
+        'lookahead', default_value='2.0', description='elorenezesi tavolsag [m]')
 
     # Gazebo inditasa a vilaggal (-r: rogton elinditja a szimulaciot)
     gazebo = IncludeLaunchDescription(
@@ -55,4 +60,22 @@ def generate_launch_description():
         parameters=[{'use_sim_time': True}],
     )
 
-    return LaunchDescription([path_type_arg, gazebo, bridge, path_generator, rviz])
+    # ParameterValue kell, kulonben a "3" int lenne es hibat dob
+    controller = Node(
+        package='path_tracking_compare',
+        executable='controller',
+        parameters=[{
+            'speed': ParameterValue(LaunchConfiguration('speed'), value_type=float),
+            'lookahead': ParameterValue(LaunchConfiguration('lookahead'), value_type=float),
+            'use_sim_time': True,
+        }],
+        output='screen',
+    )
+
+    # par masodperc, hogy a gazebo es az rviz elinduljon
+    controller_delayed = TimerAction(period=5.0, actions=[controller])
+
+    return LaunchDescription([
+        path_type_arg, speed_arg, lookahead_arg,
+        gazebo, bridge, path_generator, rviz, controller_delayed,
+    ])

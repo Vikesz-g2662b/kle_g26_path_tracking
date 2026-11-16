@@ -1,6 +1,7 @@
 """Palyakoveto szabalyozo (Pure Pursuit)."""
 
 import math
+import signal
 
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry, Path
@@ -104,19 +105,24 @@ class Controller(Node):
     def stop(self):
         self.cmd_pub.publish(Twist())
 
+    def request_stop(self, signum, frame):
+        self.running = False
+
 
 def main(args=None):
     # sajat Ctrl+C kezeles, hogy leallaskor meg el tudjuk kuldeni a 0 sebesseget
     rclpy.init(args=args, signal_handler_options=SignalHandlerOptions.NO)
     node = Controller()
-    try:
-        rclpy.spin(node)
-    except KeyboardInterrupt:
-        pass
-    finally:
-        node.stop()
-        node.destroy_node()
-        rclpy.try_shutdown()
+    node.running = True
+    signal.signal(signal.SIGINT, node.request_stop)
+    signal.signal(signal.SIGTERM, node.request_stop)
+
+    while node.running and rclpy.ok():
+        rclpy.spin_once(node, timeout_sec=0.1)
+
+    node.stop()
+    node.destroy_node()
+    rclpy.try_shutdown()
 
 
 if __name__ == '__main__':
