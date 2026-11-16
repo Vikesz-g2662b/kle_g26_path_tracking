@@ -26,6 +26,7 @@ setup(
     entry_points={
         'console_scripts': [
             'path_generator = path_tracking_compare.path_generator:main',
+            'controller = path_tracking_compare.controller:main',
         ],
     },
 )
