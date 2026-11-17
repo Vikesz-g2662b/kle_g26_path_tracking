@@ -18,6 +18,8 @@ def generate_launch_description():
 
     path_type_arg = DeclareLaunchArgument(
         'path_type', default_value='circle', description='circle, figure8 vagy track')
+    method_arg = DeclareLaunchArgument(
+        'method', default_value='pure_pursuit', description='szabalyozo tipusa')
     speed_arg = DeclareLaunchArgument(
         'speed', default_value='1.0', description='sebesseg [m/s]')
     lookahead_arg = DeclareLaunchArgument(
@@ -65,6 +67,7 @@ def generate_launch_description():
         package='path_tracking_compare',
         executable='controller',
         parameters=[{
+            'method': LaunchConfiguration('method'),
             'speed': ParameterValue(LaunchConfiguration('speed'), value_type=float),
             'lookahead': ParameterValue(LaunchConfiguration('lookahead'), value_type=float),
             'use_sim_time': True,
@@ -76,6 +79,6 @@ def generate_launch_description():
     controller_delayed = TimerAction(period=5.0, actions=[controller])
 
     return LaunchDescription([
-        path_type_arg, speed_arg, lookahead_arg,
+        path_type_arg, method_arg, speed_arg, lookahead_arg,
         gazebo, bridge, path_generator, rviz, controller_delayed,
     ])
